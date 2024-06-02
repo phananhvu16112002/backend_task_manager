@@ -1,16 +1,18 @@
+import {AuthenticationComponent} from '@loopback/authentication';
+import {JWTService, TokenServiceBindings} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
   RestExplorerComponent,
 } from '@loopback/rest-explorer';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
-import { UserServices } from './services/user.services';
-import { TaskServices } from './services/task.services';
+import {TaskServices} from './services/task.services';
+import {UserServices} from './services/user.services';
 
 export {ApplicationConfig};
 
@@ -42,12 +44,26 @@ export class TaskManagerApplication extends BootMixin(
         nested: true,
       },
     };
+
+    // this.component(AuthenticationComponent);
+    // // Mount jwt component
+    // this.component(JWTAuthenticationComponent);
+    // // Bind datasource
+    // this.dataSource(TaskManagerDataSource, UserServiceBindings.DATASOURCE_NAME);
+
+    // this.bind('jwt.secret').to('my-secret-key');
+    // this.bind('jwt.expiresIn').to('1h');
+
+    // Mount authentication system
+    this.component(AuthenticationComponent);
+
+    // Bind JWT service
+    this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
     this.setUpBindings();
   }
 
-  setUpBindings():void{
+  setUpBindings(): void {
     this.bind('services.UserService').toClass(UserServices);
     this.bind('services.TaskServices').toClass(TaskServices);
-
   }
 }
