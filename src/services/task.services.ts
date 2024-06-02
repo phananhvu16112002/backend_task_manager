@@ -181,4 +181,28 @@ export class TaskServices {
       data: tasks,
     };
   }
+
+  async dragAndDrop(
+    taskID: number,
+    taskData: {
+      type: string;
+    },
+  ): Promise<Object> {
+    const existTask = await this.taskRepository.findById(taskID);
+    console.log('task', existTask);
+
+    if (!existTask) {
+      return {
+        status_code: 422,
+        message: 'Công việc không tồn tại',
+      };
+    }
+    existTask.type = taskData.type;
+    await this.taskRepository.update(existTask);
+    return {
+      status_code: 200,
+      message: 'Cập nhật thể loại thành công',
+      data: existTask,
+    };
+  }
 }
