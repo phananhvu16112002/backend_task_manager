@@ -82,9 +82,8 @@ export class TaskController {
     }
   }
 
-  @get('taskController/getTasks/{userID}')
+  @get('taskController/getTasks')
   async getTaskByUserID(
-    @param.path.number('userID') userID: number,
     @inject(RestBindings.Http.REQUEST) request: Request,
   ): Promise<Object> {
     try {
@@ -97,8 +96,14 @@ export class TaskController {
         process.env.accessTokenKey || 'accessTokenKey',
       );
       console.log('verify', decoded);
-      const getTasks = await this.taskServices.getTaskbyUserID(userID);
-      return getTasks;
+      if (typeof decoded === 'object') {
+        const getTasks = await this.taskServices.getTaskbyUserID(
+          decoded.userID,
+        );
+        return getTasks;
+      } else {
+        throw new HttpErrors.Unauthorized('Invalid token');
+      }
     } catch (error) {
       throw new HttpErrors.Unauthorized('Invalid token');
     }
@@ -133,8 +138,30 @@ export class TaskController {
     taskData: {
       type: string;
     },
+    @inject(RestBindings.Http.REQUEST) request: Request,
   ): Promise<Object> {
-    const updateTask = await this.taskServices.dragAndDrop(taskID, taskData);
-    return updateTask;
+    try {
+      const token = request.headers.authorization?.split(' ')[1];
+      if (!token) {
+        throw new HttpErrors.Unauthorized('Token is missing');
+      }
+      const decoded = jwt.verify(
+        token,
+        process.env.accessTokenKey || 'accessTokenKey',
+      );
+      console.log('verify', decoded);
+      if (typeof decoded === 'object') {
+        const updateTask = await this.taskServices.dragAndDrop(
+          taskID,
+          decoded.userID,
+          taskData,
+        );
+        return updateTask;
+      } else {
+        throw new HttpErrors.Unauthorized('Invalid token');
+      }
+    } catch (error) {
+      throw new HttpErrors.Unauthorized('Invalid token');
+    }
   }
 }

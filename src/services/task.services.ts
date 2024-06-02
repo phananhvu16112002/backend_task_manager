@@ -184,11 +184,17 @@ export class TaskServices {
 
   async dragAndDrop(
     taskID: number,
+    userID: number,
     taskData: {
       type: string;
     },
   ): Promise<Object> {
-    const existTask = await this.taskRepository.findById(taskID);
+    const existTask = await this.taskRepository.findOne({
+      where: {
+        userId: userID,
+        taskID: taskID,
+      },
+    });
     console.log('task', existTask);
 
     if (!existTask) {
