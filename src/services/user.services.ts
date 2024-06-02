@@ -3,9 +3,11 @@ import {HttpErrors} from '@loopback/rest';
 import {UserRepository} from '../repositories';
 
 import bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 import {User} from '../models/user.model';
 
+dotenv.config();
 export class UserServices {
   constructor(
     @repository(UserRepository)
@@ -88,9 +90,9 @@ export class UserServices {
           userName: existUser.userName,
           userID: existUser.userID,
         },
-        'accessTokenKey',
+        process.env.accessTokenKey!,
         {
-          expiresIn: '30m',
+          expiresIn: '1h',
         },
       );
 
@@ -99,7 +101,7 @@ export class UserServices {
           userName: existUser.userName,
           userID: existUser.userID,
         },
-        'refreshToken',
+        process.env.refreshTokenKey!,
         {
           expiresIn: '8h',
         },

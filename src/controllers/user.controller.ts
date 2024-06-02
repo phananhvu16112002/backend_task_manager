@@ -82,13 +82,61 @@ export class UserController {
   ): Promise<Object> {
     try {
       console.log(newUserRequest.token);
+
       const verify = jwt.verify(newUserRequest.token, 'accessTokenKey');
+      if (typeof verify === 'object') {
+        const userName = verify.userName;
+        const userID = verify.userID;
+        console.log('name', userName);
+        console.log('userID', userID);
+      }
+
       return {
         status_Code: 200,
         verify: verify,
       };
     } catch (error) {
       throw new HttpErrors.InternalServerError('Failed to login');
+    }
+  }
+
+  @post('users/createNewAccessToken')
+  async createNewToken(
+    @requestBody()
+    token: {
+      refreshToken: string;
+    },
+  ): Promise<Object> {
+    try {
+      let accessToken = '';
+      console.log(token.refreshToken);
+      const verify = jwt.verify(
+        token.refreshToken,
+        process.env.refreshTokenKey || 'refreshTokenKey',
+      );
+      console.log(verify);
+
+      if (typeof verify === 'object') {
+        const userName = verify.userName;
+        const userID = verify.userID;
+        accessToken = jwt.sign(
+          {
+            userName: userName,
+            userID: userID,
+          },
+          process.env.accessTokenKey || 'accessTokenKey',
+          {
+            expiresIn: '1h',
+          },
+        );
+      }
+
+      return {
+        status_Code: 200,
+        newAccessToken: accessToken,
+      };
+    } catch (error) {
+      throw new HttpErrors.InternalServerError(error);
     }
   }
 }
