@@ -49,6 +49,8 @@
     "!*/__tests__"
   ],
   "dependencies": {
+    "@loopback/authentication": "^11.0.2",
+    "@loopback/authentication-jwt": "^0.15.2",
     "@loopback/boot": "^7.0.2",
     "@loopback/core": "^6.0.2",
     "@loopback/repository": "^7.0.2",
@@ -58,8 +60,10 @@
     "@types/jsonwebtoken": "^9.0.6",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
     "loopback-connector-mysql": "^7.0.10",
+    "morgan": "^1.10.0",
     "tslib": "^2.0.0"
   },
   "devDependencies": {
