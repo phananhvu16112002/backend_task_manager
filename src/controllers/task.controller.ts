@@ -13,13 +13,14 @@ import {
   put,
   requestBody,
 } from '@loopback/rest';
+import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 import {Task} from '../models';
 import {TaskRepository} from '../repositories';
 import {TaskServices} from '../services/task.services';
 
 // import {inject} from '@loopback/core';
-
+dotenv.config();
 export class TaskController {
   constructor(
     @repository(TaskRepository)
@@ -27,7 +28,7 @@ export class TaskController {
     @inject('services.TaskServices') private taskServices: TaskServices,
   ) {}
 
-  @post('/createTask')
+  @post('taskController/createTask')
   async createTask(
     @requestBody()
     taskData: {
@@ -52,7 +53,7 @@ export class TaskController {
     }
   }
 
-  @put('/editTask/{id}')
+  @put('taskController/editTask/{id}')
   async editTask(
     @param.path.number('id') taskId: number,
     @requestBody() taskData: Partial<Task>,
@@ -68,7 +69,7 @@ export class TaskController {
     }
   }
 
-  @del('/deleteTask/{id}')
+  @del('taskController/deleteTask/{id}')
   async deleteTask(@param.path.number('id') taskId: number): Promise<Object> {
     try {
       const deleteTask = await this.taskServices.deleteTask(taskId);
@@ -81,9 +82,8 @@ export class TaskController {
     }
   }
 
-  @get('/getTasks/{userID}')
+  @get('taskController/getTasks')
   async getTaskByUserID(
-    @param.path.number('userID') userID: number,
     @inject(RestBindings.Http.REQUEST) request: Request,
   ): Promise<Object> {
     try {
@@ -91,16 +91,25 @@ export class TaskController {
       if (!token) {
         throw new HttpErrors.Unauthorized('Token is missing');
       }
-      const decoded = jwt.verify(token, 'accessTokenKey');
+      const decoded = jwt.verify(
+        token,
+        process.env.accessTokenKey || 'accessTokenKey',
+      );
       console.log('verify', decoded);
-      const getTasks = await this.taskServices.getTaskbyUserID(userID);
-      return getTasks;
+      if (typeof decoded === 'object') {
+        const getTasks = await this.taskServices.getTaskbyUserID(
+          decoded.userID,
+        );
+        return getTasks;
+      } else {
+        throw new HttpErrors.Unauthorized('Invalid token');
+      }
     } catch (error) {
       throw new HttpErrors.Unauthorized('Invalid token');
     }
   }
 
-  @get('/filterTasks/{userID}')
+  @get('taskController/filterTasks/{userID}')
   async getFilterTask(
     @param.path.number('userID') userID: number,
     @param.query.string('startDate') startDate?: string,
@@ -120,5 +129,39 @@ export class TaskController {
       type,
     });
     return getTasks;
+  }
+
+  @put('taskController/dragAndDrop/{taskID}')
+  async dragAndDrop(
+    @param.path.number('taskID') taskID: number,
+    @requestBody()
+    taskData: {
+      type: string;
+    },
+    @inject(RestBindings.Http.REQUEST) request: Request,
+  ): Promise<Object> {
+    try {
+      const token = request.headers.authorization?.split(' ')[1];
+      if (!token) {
+        throw new HttpErrors.Unauthorized('Token is missing');
+      }
+      const decoded = jwt.verify(
+        token,
+        process.env.accessTokenKey || 'accessTokenKey',
+      );
+      console.log('verify', decoded);
+      if (typeof decoded === 'object') {
+        const updateTask = await this.taskServices.dragAndDrop(
+          taskID,
+          decoded.userID,
+          taskData,
+        );
+        return updateTask;
+      } else {
+        throw new HttpErrors.Unauthorized('Invalid token');
+      }
+    } catch (error) {
+      throw new HttpErrors.Unauthorized('Invalid token');
+    }
   }
 }
