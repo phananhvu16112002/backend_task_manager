@@ -1,4 +1,4 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {Entity, belongsTo, model, property} from '@loopback/repository';
 import {User} from './user.model';
 
 @model({settings: {strict: false}})
@@ -50,9 +50,14 @@ export class Task extends Entity {
   endTime: string;
 
   @property({
-    type:'date',
+    type: 'date',
   })
   dateUpdated?: string;
+
+  @property({
+    type: 'boolean',
+  })
+  isDeleted?: boolean;
 
   @belongsTo(() => User)
   userId: string;

@@ -211,4 +211,52 @@ export class TaskServices {
       data: existTask,
     };
   }
+
+  async getDetailTask(taskID: number) {
+    const existTask = await this.taskRepository.findById(taskID);
+    if (!existTask) {
+      return {
+        status_code: 422,
+        message: 'Công việc không tồn tại',
+      };
+    }
+    return {
+      status_code: 200,
+      message: 'Lấy dữ liệu thành công',
+      data: existTask,
+    };
+  }
+
+  async deleteTempTask(taskId: number) {
+    const existTask = await this.taskRepository.findById(taskId);
+    if (!existTask) {
+      return {
+        status_code: 422,
+        message: 'Công việc không tồn tại',
+      };
+    }
+    existTask.isDeleted = true;
+    await this.taskRepository.update(existTask);
+    return {
+      status_code: 200,
+      message: 'Xóa thành công',
+      data: existTask,
+    };
+  }
+
+  async getRecycleTask(userId: number) {
+    const data = await this.taskRepository.find({
+      where: {
+        userId: userId,
+        isDeleted: true,
+      },
+    });
+    console.log('data', data);
+
+    return {
+      status_code: 200,
+      message: 'data',
+      data: data,
+    };
+  }
 }

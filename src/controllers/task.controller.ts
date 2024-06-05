@@ -164,4 +164,29 @@ export class TaskController {
       throw new HttpErrors.Unauthorized('Invalid token');
     }
   }
+
+  @post('taskController/getDetailTask/{taskId}')
+  async getDetailTask(
+    @param.path.number('taskId') taskId: number,
+  ): Promise<Object> {
+    console.log('taskId', taskId);
+    const getDetailTask = await this.taskServices.getDetailTask(taskId);
+    return getDetailTask;
+  }
+
+  @put('taskController/deleteTaskTemp/{taskId}')
+  async deleteTempTask(
+    @param.path.number('taskId') taskId: number,
+  ): Promise<Object> {
+    const data = await this.taskServices.deleteTempTask(taskId);
+    return data;
+  }
+
+  @get('taskController/getRecycleTask/{userId}')
+  async getRecycleTask(
+    @param.path.number('userId') userId: number,
+  ): Promise<Object> {
+    const data = await this.taskServices.getRecycleTask(userId);
+    return data;
+  }
 }
