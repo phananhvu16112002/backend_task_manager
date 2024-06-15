@@ -1,4 +1,5 @@
-import {ApplicationConfig, TaskManagerApplication} from './application';
+import {ApplicationConfig} from './application';
+import {TaskManagerApplication} from './TaskManagerApplication';
 
 export * from './application';
 

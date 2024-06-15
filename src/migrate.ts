@@ -1,4 +1,4 @@
-import {TaskManagerApplication} from './application';
+import {TaskManagerApplication} from './TaskManagerApplication';
 
 export async function migrate(args: string[]) {
   const existingSchema = args.includes('--rebuild') ? 'drop' : 'alter';

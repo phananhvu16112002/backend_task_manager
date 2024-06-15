@@ -1,12 +1,10 @@
-import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
-import {JWTAuthenticationStrategy} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
-  RestExplorerComponent,
+  RestExplorerComponent
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
@@ -14,10 +12,9 @@ import {MySequence} from './sequence';
 import {TaskServices} from './services/task.services';
 import {UserServices} from './services/user.services';
 
-export {ApplicationConfig};
 
 export class TaskManagerApplication extends BootMixin(
-  ServiceMixin(RepositoryMixin(RestApplication)),
+  ServiceMixin(RepositoryMixin(RestApplication))
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
@@ -46,9 +43,6 @@ export class TaskManagerApplication extends BootMixin(
     };
     this.setUpBindings();
 
-    this.component(AuthenticationComponent);
-    registerAuthenticationStrategy(this, JWTAuthenticationStrategy);
-    this.bind('authentication.jwt.secret').to('accessTokenKey');
   }
 
   setUpBindings(): void {

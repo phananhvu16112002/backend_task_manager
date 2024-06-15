@@ -1,5 +1,5 @@
 import {ApplicationConfig} from '@loopback/core';
-import {TaskManagerApplication} from './application';
+import {TaskManagerApplication} from './TaskManagerApplication';
 
 /**
  * Export the OpenAPI spec from the application

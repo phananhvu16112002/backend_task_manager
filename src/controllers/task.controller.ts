@@ -1,5 +1,6 @@
 // Uncomment these imports to begin using these cool features!
 
+import {authenticate} from '@loopback/authentication';
 import {inject} from "@loopback/core";
 import {repository} from "@loopback/repository";
 import {HttpErrors, del, get, param, post, put, requestBody} from "@loopback/rest";
@@ -19,7 +20,9 @@ export class TaskController {
     @inject('services.TaskServices') private taskServices: TaskServices,
   ) { }
 
-  @post('/createTask')
+
+  @authenticate('jwt')
+  @post('/createTask',)
   async createTask(@requestBody() taskData: {
     title: string,
     content?: string,
@@ -70,6 +73,7 @@ export class TaskController {
     }
   }
 
+  @authenticate('jwt')
   @get('/getTasks/{userID}')
   async getTaskByUserID(@param.path.number('userID') userID: number): Promise<Object> {
     const getTasks = await this.taskServices.getTaskbyUserID(userID);

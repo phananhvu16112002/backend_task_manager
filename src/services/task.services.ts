@@ -1,4 +1,4 @@
-import {repository} from "@loopback/repository";
+import {IsolationLevel, repository} from "@loopback/repository";
 import {Task} from "../models";
 import {TaskRepository, UserRepository} from "../repositories";
 
@@ -21,26 +21,45 @@ export class TaskServices {
         endTime: string,
         userID: string
     }): Promise<Task | null> {
-        const task = new Task({...taskData, dateCreated: new Date().toISOString()});
-        return this.taskRepository.create(task);
+        const ds = this.taskRepository.dataSource;
+        const tx = await ds.beginTransaction(IsolationLevel.READ_COMMITTED);
+        try {
+            const task = new Task({...taskData, dateCreated: new Date().toISOString()});
+            const createTask = await this.taskRepository.create(task, {transaction: tx});
+            await tx.commit();
+            return createTask;
+        } catch (error) {
+            await tx.rollback();
+            throw error;
+        }
+
     }
 
     async editTask(taskId: number, taskData: Partial<Task>): Promise<Object> {
-        const existingTask = await this.taskRepository.findById(taskId);
-        if (!existingTask) {
-            return {
-                status_code: 422,
-                message: "Công việc không tồn tại"
+        const ds = this.taskRepository.dataSource;
+        const tx = await ds.beginTransaction(IsolationLevel.READ_COMMITTED);
+        try {
+            const existingTask = await this.taskRepository.findById(taskId);
+            if (!existingTask) {
+                return {
+                    status_code: 422,
+                    message: "Công việc không tồn tại"
+                }
             }
+            Object.assign(existingTask, taskData, {dateUpdated: new Date().toISOString()});
+            await this.taskRepository.updateById(taskId, existingTask, {transaction: tx});
+            const result = await this.taskRepository.findById(taskId);
+            await tx.commit();
+            return {
+                status_code: 200,
+                message: "Chỉnh sửa công việc thành công",
+                data: result
+            }
+        } catch (error) {
+            await tx.rollback();
+            throw error;
         }
-        Object.assign(existingTask, taskData, {dateUpdated: new Date().toISOString()});
-        await this.taskRepository.updateById(taskId, existingTask);
-        const result = await this.taskRepository.findById(taskId);
-        return {
-            status_code: 200,
-            message: "Chỉnh sửa công việc thành công",
-            data: result
-        }
+
     }
 
     async deleteTask(taskId: number): Promise<Object> {
