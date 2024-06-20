@@ -77,30 +77,6 @@ export class TaskServices {
         }
     }
 
-    // async getTaskbyUserID(userID: number): Promise<object> {
-    //     // Kiểm tra xem user có tồn tại không
-    //     // const checkUser = await this.userRepository.findById(userID.toString().trim());
-    //     // if (!checkUser) {
-    //     //     return {
-    //     //         status_code: 422,
-    //     //         message: 'User không tồn tại',
-    //     //     };
-    //     // }
-
-    //     const tasks = await this.taskRepository.find({where: {userId: userID}});
-    //     const categorizedTasks = {
-    //         todo: tasks.filter(task => task.type === 'Todo'),
-    //         progress: tasks.filter(task => task.type === 'In Progress'),
-    //         done: tasks.filter(task => task.type === 'Done'),
-    //     };
-
-    //     return {
-    //         status_code: 200,
-    //         message: `Danh sách công việc của ${userID}`,
-    //         data: categorizedTasks,
-    //     };
-    // }
-
 
     async getTaskbyUserID(userID: number): Promise<object> {
         console.log(`Finding user with ID: ${userID}`);

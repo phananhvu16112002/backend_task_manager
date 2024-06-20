@@ -1,5 +1,4 @@
 import {repository} from "@loopback/repository";
-import {HttpErrors} from "@loopback/rest";
 import {UserRepository} from "../repositories";
 
 import bcrypt from 'bcryptjs';
@@ -53,54 +52,44 @@ export class UserServices {
     }
 
     async login(userRequest: {userName: string, password: string}): Promise<Object> {
-        try {
-            const existUser = await this.userRepository.findOne({
-                where: {userName: userRequest.userName}
-            })
-            let error: string = '';
-            if (!existUser) {
-                error = 'Username không tồn tại'
-                return {
-                    status_code: 422,
-                    message: error
-                }
-            }
-            const passwordMatch = await bcrypt.compare(userRequest.password, existUser.password);
-            if (!passwordMatch) {
-                error = 'Mật khẩu không đúng'
-                return {
-                    status_code: 422,
-                    message: error
-                }
-            }
+        const existUser = await this.userRepository.findOne({
+            where: {userName: userRequest.userName}
+        });
 
-            const accessToken = jwt.sign({
-                userName: existUser.userName,
-                userID: existUser.userID,
-            },
-                'accessTokenKey', {
-                expiresIn: '1h',
-            }
-            );
-
-            const refreshToken = jwt.sign({
-                userName: existUser.userName,
-                userID: existUser.userID,
-            },
-                'refreshToken', {
-                expiresIn: '8h',
-            }
-            );
-            let data = {accessToken: accessToken, refreshToken: refreshToken};
+        if (!existUser) {
             return {
-                status_code: 200,
-                message: "Đăng nhập thành công",
-                data: data
+                status_code: 422,
+                message: 'Username không tồn tại'
             };
-        } catch (error) {
-            throw HttpErrors.BadRequest(error);
         }
+
+        const passwordMatch = await bcrypt.compare(userRequest.password, existUser.password);
+        if (!passwordMatch) {
+            return {
+                status_code: 422,
+                message: 'Mật khẩu không đúng'
+            };
+        }
+
+        const accessToken = jwt.sign(
+            {userName: existUser.userName, userID: existUser.userID},
+            'accessTokenKey',
+            {expiresIn: '1h'}
+        );
+
+        const refreshToken = jwt.sign(
+            {userName: existUser.userName, userID: existUser.userID},
+            'refreshToken',
+            {expiresIn: '8h'}
+        );
+
+        return {
+            status_code: 200,
+            message: 'Đăng nhập thành công',
+            data: {accessToken, refreshToken}
+        };
     }
+
 
 
 
